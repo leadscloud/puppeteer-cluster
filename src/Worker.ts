@@ -61,21 +61,34 @@ export default class Worker<JobData, ReturnData> implements WorkerOptions {
         let jobInstance: JobInstance | null = null;
         let page: Page | null = null;
 
-        let tries = 0;
-
-        while (jobInstance === null) {
+        if (jobInstance === null) {
             try {
                 jobInstance = await this.browser.jobInstance();
                 page = jobInstance.resources.page;
             } catch (err) {
-                debug(`Error getting browser page (try: ${tries}), message: ${err.message}`);
-                await this.browser.repair();
-                tries += 1;
-                if (tries >= BROWSER_INSTANCE_TRIES) {
-                    throw new Error('Unable to get browser page');
-                }
+                debug(`Error getting browser page, message: ${err.message}`);
+                return {
+                    type: 'error',
+                    error: err
+                };
             }
         }
+
+        // let tries = 0;
+
+        // while (jobInstance === null) {
+        //     try {
+        //         jobInstance = await this.browser.jobInstance();
+        //         page = jobInstance.resources.page;
+        //     } catch (err) {
+        //         debug(`Error getting browser page (try: ${tries}), message: ${err.message}`);
+        //         await this.browser.repair();
+        //         tries += 1;
+        //         if (tries >= BROWSER_INSTANCE_TRIES) {
+        //             throw new Error('Unable to get browser page');
+        //         }
+        //     }
+        // }
 
          // We can be sure that page is set now, otherwise an exception would've been thrown
         page = page as Page; // this is just for TypeScript
